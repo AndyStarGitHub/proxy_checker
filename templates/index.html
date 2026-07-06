@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Status Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5" style="max-width: 1000px;">
+        <h2 class="mb-4 text-center text-primary">Proxy Monitoring Dashboard</h2>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white fw-bold">Add New Proxy</div>
+            <div class="card-body">
+                <form action="/add" method="POST" class="row g-3">
+                    <div class="col-md-9">
+                        <input type="text" name="proxy_url" class="form-control" placeholder="http://user:pass@ip:port" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-success w-100">+ Add Proxy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="m-0">Proxy List</h4>
+            <div>
+                <a href="/" class="btn btn-secondary me-2">Reset Status</a>
+                <a href="/check" class="btn btn-primary">Check All Proxies</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Proxy URL</th>
+                            <th>Status</th>
+                            <th>Latency (Ping)</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proxy in proxies %}
+                        <tr class="{% if proxy.status == 'fast' %}table-success{% elif proxy.status == 'slow' %}table-warning{% elif proxy.status == 'dead' %}table-danger{% endif %}">
+                            <td>{{ loop.index }}</td>
+                            <td class="font-monospace" style="font-size: 0.9rem;">{{ proxy.url }}</td>
+                            <td>
+                                {% if proxy.status == 'fast' %}
+                                    <span class="badge bg-success">Fast</span>
+                                {% elif proxy.status == 'slow' %}
+                                    <span class="badge bg-warning text-dark">Slow</span>
+                                {% elif proxy.status == 'dead' %}
+                                    <span class="badge bg-danger">Dead</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Not Checked</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ proxy.latency }}</strong></td>
+                            <td class="text-center">
+                                <form action="/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this proxy?');">
+                                    <input type="hidden" name="proxy_url" value="{{ proxy.url }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
